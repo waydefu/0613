@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>台灣美食外送平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+    header {
+      background-color: #ff4d6d;
+      color: white;
+      padding: 1rem 0;
+      font-weight: 700;
+      font-size: 1.75rem;
+      text-align: center;
+      box-shadow: 0 3px 6px rgb(0 0 0 / 0.1);
+      letter-spacing: 2px;
+      user-select: none;
+    }
+    nav.navbar {
+      background-color: white;
+      box-shadow: 0 1px 8px rgb(0 0 0 / 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+    }
+    nav .navbar-brand,
+    nav .nav-link,
+    nav .btn {
+      color: #ff4d6d;
+      font-weight: 600;
+    }
+    nav .nav-link:hover,
+    nav .btn:hover {
+      color: #d62e4d;
+    }
+    main.container {
+      padding-top: 2.5rem;
+      padding-bottom: 4rem;
+    }
+    .carousel-item img {
+      height: 450px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
+    .carousel-caption {
+      background-color: rgba(255, 77, 109, 0.85);
+      padding: 0.5rem 1rem;
+      border-radius: 0.4rem;
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+    .food-list {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .food-card {
+      border: none;
+      box-shadow: 0 6px 12px rgb(0 0 0 / 0.08);
+      border-radius: 12px;
+      background: white;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .food-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgb(0 0 0 / 0.12);
+    }
+    .food-card img {
+      border-radius: 12px 12px 0 0;
+      height: 160px;
+      width: 100%;
+      object-fit: cover;
+    }
+    .food-card-body {
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-grow: 1;
+    }
+    .food-card-title {
+      color: #ff4d6d;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+    .food-card-desc {
+      font-size: 0.95rem;
+      color: #444;
+      min-height: 56px;
+      margin-bottom: 0.8rem;
+    }
+    .food-card-price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #d62e4d;
+    }
+    .btn-add-cart {
+      background-color: #ff4d6d;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 0.5rem 1rem;
+      transition: background-color 0.3s;
+      align-self: center;
+      width: 90%;
+    }
+    .btn-add-cart:hover {
+      background-color: #d62e4d;
+    }
+    #content .random-food {
+      margin-top: 3rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ff4d6d;
+    }
+    #cart-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: #ff4d6d;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      box-shadow: 0 4px 12px rgba(255, 77, 109, 0.6);
+      border: none;
+      color: white;
+      font-size: 24px;
+      z-index: 1100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #cart-count {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: white;
+      color: #ff4d6d;
+      font-weight: 700;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -350px;
+      width: 350px;
+      height: 100vh;
+      background: white;
+      box-shadow: -4px 0 14px rgba(0, 0, 0, 0.2);
+      transition: right 0.3s ease;
+      z-index: 1200;
+      display: flex;
+      flex-direction: column;
+    }
+    #cart-drawer.open {
+      right: 0;
+    }
+    #cart-drawer header {
+      background-color: #ff4d6d;
+      color: white;
+      font-weight: 700;
+      font-size: 1.25rem;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #cart-items {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .cart-item {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.75rem;
+    }
+    .cart-item img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .cart-item-title {
+      font-weight: 700;
+      color: #ff4d6d;
+      font-size: 1rem;
+    }
+    .cart-item-price {
+      color: #d62e4d;
+      font-weight: 700;
+    }
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cart-item-controls button {
+      background-color: #ff4d6d;
+      border: none;
+      color: white;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 0 8px;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #cart-total {
+      padding: 1rem;
+      border-top: 1px solid #ddd;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #ff4d6d;
+    }
+    #cart-items::-webkit-scrollbar {
+      width: 8px;
+    }
+    #cart-items::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 77, 109, 0.5);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>台灣美食外送平台</header>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="#">美食導覽</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="切換導航">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto gap-3">
+          <li class="nav-item"><a class="nav-link" href="#carouselExampleCaptions">輪播</a></li>
+          <li class="nav-item"><a class="nav-link" href="#foodList">美食列表</a></li>
+          <li class="nav-item"><a class="nav-link" href="#content">推薦美食</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- 輪播 -->
+    <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner rounded-20">
+        <div class="carousel-item active">
+          <img src="photos/珍珠奶茶.jpg" class="d-block w-100" alt="珍珠奶茶" />
+          <div class="carousel-caption">珍珠奶茶</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/蚵仔煎.jpg" class="d-block w-100" alt="蚵仔煎" />
+          <div class="carousel-caption">蚵仔煎</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/牛肉麵.jpg" class="d-block w-100" alt="牛肉麵" />
+          <div class="carousel-caption">牛肉麵</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/滷肉飯.jpg" class="d-block w-100" alt="滷肉飯" />
+          <div class="carousel-caption">滷肉飯</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/鹹酥雞.jpg" class="d-block w-100" alt="鹹酥雞" />
+          <div class="carousel-caption">鹹酥雞</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/炸雞排.jpg" class="d-block w-100" alt="炸雞排" />
+          <div class="carousel-caption">炸雞排</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/雞肉飯.jpg" class="d-block w-100" alt="雞肉飯" />
+          <div class="carousel-caption">雞肉飯</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/大腸包小腸.jpg" class="d-block w-100" alt="大腸包小腸" />
+          <div class="carousel-caption">大腸包小腸</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/豆花.jpg" class="d-block w-100" alt="豆花" />
+          <div class="carousel-caption">豆花</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/刈包.jpg" class="d-block w-100" alt="刈包" />
+          <div class="carousel-caption">刈包</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/鹽酥雞.jpg" class="d-block w-100" alt="鹽酥雞" />
+          <div class="carousel-caption">鹽酥雞</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/臭豆腐.jpg" class="d-block w-100" alt="臭豆腐" />
+          <div class="carousel-caption">臭豆腐</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/肉圓.jpg" class="d-block w-100" alt="肉圓" />
+          <div class="carousel-caption">肉圓</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/炒米粉.jpg" class="d-block w-100" alt="炒米粉" />
+          <div class="carousel-caption">炒米粉</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/魷魚羹.jpg" class="d-block w-100" alt="魷魚羹" />
+          <div class="carousel-caption">魷魚羹</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/陽春麵.jpg" class="d-block w-100" alt="陽春麵" />
+          <div class="carousel-caption">陽春麵</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/滷味拼盤.jpg" class="d-block w-100" alt="滷味拼盤" />
+          <div class="carousel-caption">滷味拼盤</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/豆干.jpg" class="d-block w-100" alt="豆干" />
+          <div class="carousel-caption">豆干</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/草莓大福.jpg" class="d-block w-100" alt="草莓大福" />
+          <div class="carousel-caption">草莓大福</div>
+        </div>
+        <div class="carousel-item">
+          <img src="photos/鳳梨酥.jpg" class="d-block w-100" alt="鳳梨酥" />
+          <div class="carousel-caption">鳳梨酥</div>
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">上一頁</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">下一頁</span>
+      </button>
+    </div>
+
+    <!-- 美食列表 -->
+    <section id="foodList" class="food-list"></section>
+
+    <!-- 推薦美食 -->
+    <section id="content">
+      <div class="random-food"></div>
+    </section>
+<!-- 新增作品集區 -->
+<section id="portfolio" class="mt-5">
+  <h2 class="text-center text-danger fw-bold mb-4">數位媒體設計｜潘亮志 的作品集</h2>
+  <div class="container">
+    <!-- PDF 下載區 -->
+    <div class="row mb-5">
+      <div class="col-12 mb-3">
+        <h4 class="fw-semibold">作品下載</h4>
+      </div>
+      <div class="col-md-4">
+        <a href="assets/portfolio_web02.zip" class="btn btn-outline-danger w-100 mb-2" download>
+          下載：HK02_zip
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="assets/portfolio_web03.zip" class="btn btn-outline-danger w-100 mb-2" download>
+          下載：HK03_zip
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="assets/portfolio_web05.zip" class="btn btn-outline-danger w-100 mb-2" download>
+          下載：HK05_zip
+        </a>
+      </div>
+    </div>
+
+    <!-- InDesign 專區 -->
+    <div class="row">
+      <div class="col-12 mb-3">
+        <h4 class="fw-semibold">InDesign 畫面截圖</h4>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <img src="assets/screenshot_02.jpg" alt="HK02" class="card-img-top">
+          <div class="card-body text-center">
+            <small>HK02</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <img src="assets/screenshot_03.jpg" alt="HK03" class="card-img-top">
+          <div class="card-body text-center">
+            <small>HK03</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <img src="assets/screenshot_05.jpg" alt="HK05" class="card-img-top">
+          <div class="card-body text-center">
+            <small>HK05</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+  </main>
+
+  <!-- 購物籃按鈕與側邊欄 -->
+  <button id="cart-btn" aria-label="打開購物籃">🛒<div id="cart-count" style="display:none">0</div></button>
+  <aside id="cart-drawer" aria-label="購物籃">
+    <header>
+      購物籃
+      <button class="close-btn" aria-label="關閉購物籃">✕</button>
+    </header>
+    <div id="cart-items"></div>
+    <div id="cart-total">總計：$0</div>
+  </aside>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const foods = [
+    { id: 1, name: "珍珠奶茶", description: "甜美香濃的珍珠奶茶，台灣招牌飲品。", price: 60, image: "photos/珍珠奶茶.jpg" },
+  { id: 2, name: "蚵仔煎", description: "鮮嫩多汁的蚵仔煎，外酥內嫩。", price: 80, image: "photos/蚵仔煎.jpg" },
+  { id: 3, name: "牛肉麵", description: "濃郁紅燒湯頭搭配彈牙牛肉麵。", price: 120, image: "photos/牛肉麵.jpg" },
+  { id: 4, name: "滷肉飯", description: "經典台灣滷肉飯，香氣四溢。", price: 50, image: "photos/滷肉飯.jpg" },
+  { id: 5, name: "鹹酥雞", description: "香酥可口的鹹酥雞，台灣夜市經典。", price: 70, image: "photos/鹹酥雞.jpg" },
+  { id: 6, name: "炸雞排", description: "厚實多汁的炸雞排，讓人一吃難忘。", price: 90, image: "photos/炸雞排.jpg" },
+  { id: 7, name: "雞肉飯", description: "香嫩入味的雞肉飯，平價美味。", price: 60, image: "photos/雞肉飯.jpg" },
+  { id: 8, name: "大腸包小腸", description: "糯米腸包裹著香腸，口感絕佳。", price: 70, image: "photos/大腸包小腸.jpg" },
+  { id: 9, name: "豆花", description: "綿密滑順的豆花，甜而不膩。", price: 40, image: "photos/豆花.jpg" },
+  { id: 10, name: "刈包", description: "台式漢堡，內夾五花肉與酸菜。", price: 65, image: "photos/刈包.jpg" },
+  { id: 11, name: "鹽酥雞", description: "香辣鹽酥雞，酥脆入味。", price: 75, image: "photos/鹽酥雞.jpg" },
+  { id: 12, name: "臭豆腐", description: "外酥內軟，搭配泡菜絕配。", price: 50, image: "photos/臭豆腐.jpg" },
+  { id: 13, name: "肉圓", description: "Q彈皮搭配鮮美餡料。", price: 55, image: "photos/肉圓.jpg" },
+  { id: 14, name: "炒米粉", description: "香氣四溢的台式炒米粉。", price: 60, image: "photos/炒米粉.jpg" },
+  { id: 15, name: "魷魚羹", description: "濃稠鮮美的魷魚羹湯。", price: 80, image: "photos/魷魚羹.jpg" },
+  { id: 16, name: "陽春麵", description: "簡單好吃的陽春麵。", price: 40, image: "photos/陽春麵.jpg" },
+  { id: 17, name: "滷味拼盤", description: "多種滷味拼盤，豐富選擇。", price: 110, image: "photos/滷味拼盤.jpg" },
+  { id: 18, name: "豆干", description: "滷製入味的豆干，香Q彈牙。", price: 30, image: "photos/豆干.jpg" },
+  { id: 19, name: "草莓大福", description: "甜美多汁的草莓大福。", price: 90, image: "photos/草莓大福.jpg" },
+  { id: 20, name: "鳳梨酥", description: "酥皮包裹香甜鳳梨內餡。", price: 45, image: "photos/鳳梨酥.jpg" }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const foodList = document.getElementById("foodList");
+    const cartBtn = document.getElementById("cart-btn");
+    const cartDrawer = document.getElementById("cart-drawer");
+    const cartCloseBtn = cartDrawer.querySelector(".close-btn");
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cartCount = document.getElementById("cart-count");
+    const cartTotal = document.getElementById("cart-total");
+
+    function saveCart() {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function updateCartCount() {
+      const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCount.style.display = totalCount > 0 ? "flex" : "none";
+      cartCount.textContent = totalCount;
+    }
+
+    function renderFoods() {
+      foodList.innerHTML = foods.map(food => `
+        <div class="food-card" tabindex="0" aria-label="${food.name}，價格${food.price}元">
+          <img src="${food.image}" alt="${food.name}" />
+          <div class="food-card-body">
+            <h3 class="food-card-title">${food.name}</h3>
+            <p class="food-card-desc">${food.description}</p>
+            <div class="food-card-price">$${food.price}</div>
+            <button class="btn-add-cart" data-id="${food.id}">加入購物籃</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderCart() {
+      if (!cart.length) {
+        cartItemsContainer.innerHTML = `<p style="text-align:center; color:#999;">購物籃空空如也</p>`;
+        cartTotal.textContent = "總計：$0";
+        return;
+      }
+      let total = 0;
+      cartItemsContainer.innerHTML = cart.map(item => {
+        const food = foods.find(f => f.id === item.id);
+        const itemTotal = food.price * item.quantity;
+        total += itemTotal;
+        return `
+          <div class="cart-item">
+            <img src="${food.image}" alt="${food.name}" />
+            <div class="cart-item-info">
+              <div class="cart-item-title">${food.name}</div>
+              <div class="cart-item-price">單價：$${food.price} × ${item.quantity} = $${itemTotal}</div>
+              <div class="cart-item-controls">
+                <button class="btn-decrease" data-id="${food.id}">-</button>
+                <span>${item.quantity}</span>
+                <button class="btn-increase" data-id="${food.id}">+</button>
+                <button class="btn-remove" data-id="${food.id}" style="margin-left:auto;">✕</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+      cartTotal.textContent = `總計：$${total}`;
+    }
+
+    function addToCart(id) {
+      const item = cart.find(i => i.id === id);
+      item ? item.quantity++ : cart.push({ id, quantity: 1 });
+      saveCart(); updateCartCount(); renderCart();
+    }
+
+    function changeQuantity(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity < 1) cart = cart.filter(i => i.id !== id);
+      saveCart(); updateCartCount(); renderCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      saveCart(); updateCartCount(); renderCart();
+    }
+
+    function setupEventListeners() {
+      foodList.addEventListener("click", e => {
+        if (e.target.classList.contains("btn-add-cart")) {
+          addToCart(Number(e.target.dataset.id));
+        }
+      });
+      cartBtn.addEventListener("click", () => cartDrawer.classList.add("open"));
+      cartCloseBtn.addEventListener("click", () => cartDrawer.classList.remove("open"));
+      cartItemsContainer.addEventListener("click", e => {
+        const id = Number(e.target.dataset.id);
+        if (e.target.classList.contains("btn-increase")) changeQuantity(id, 1);
+        if (e.target.classList.contains("btn-decrease")) changeQuantity(id, -1);
+        if (e.target.classList.contains("btn-remove")) removeFromCart(id);
+      });
+      document.addEventListener("click", e => {
+        if (!cartDrawer.contains(e.target) && !cartBtn.contains(e.target)) {
+          cartDrawer.classList.remove("open");
+        }
+      });
+    }
+
+    function displayRandomFood() {
+      const food = foods[Math.floor(Math.random() * foods.length)];
+      document.querySelector(".random-food").innerHTML = `推薦美食：${food.name} - ${food.description}`;
+    }
+
+    // 初始化頁面
+    renderFoods();
+    renderCart();
+    updateCartCount();
+    setupEventListeners();
+    displayRandomFood();
+  </script>
+</body>
+</html>
